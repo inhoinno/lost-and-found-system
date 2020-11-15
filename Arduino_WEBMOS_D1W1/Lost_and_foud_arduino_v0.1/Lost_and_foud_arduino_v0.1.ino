@@ -17,10 +17,11 @@ char path [] = "/";
 char host [] = "192.168.4.1";
 
 //Laser & CDS setup
-int cds = A0;
-const int LaserPin = 13;
-int sensor = 2;
+int cds1 = A0;
+int cds2 = A1;
+
 int count =0;
+
 WebSocketClient webSocketClient;
 WiFiClient client;
 void _WiFi_setup(){
@@ -73,11 +74,10 @@ void setup() {
   /**************************************/
   /***********Laser Sensor Set***********/
   
-  pinMode(cds,INPUT); //CDS : 조도센서
-  pinMode(sensor, OUTPUT); //LED : 감지 ON/OFF 
-  pinMode(LaserPin, OUTPUT); // Laser Module 
-  pinMode(LED_BUILTIN, OUTPUT); //WIFI LED
-  
+  pinMode(cds1,INPUT); //CDS : 조도센서
+  pinMode(cds2,INPUT); //
+  pinMode(13, OUTPUT); //LED : 감지 ON/OFF 
+
   /*********Laser Sensor END************/
   /**************************************/
 Serial.println("Laser Setup Done.");
@@ -138,20 +138,28 @@ void loop() {
    delay(1000);
   String data = "Sensor 1";  
 
-  // put your main code here, to run repeatedly:
-  digitalWrite(LaserPin, HIGH); 
      // Turn the LED on (Note that LOW is the voltage level
-  cds = analogRead(A0);
-  Serial.println(cds) ;
+  cds1 = analogRead(A0);
+  cds2 = analogRead(A1);
+  
+  Serial.println("cds1 : ", cds1);
+  Serial.println("cds2 : ", cds2);
+
+  /*
   if(cds < 800){
     digitalWrite(sensor,HIGH);
     digitalWrite(LED_BUILTIN, HIGH);}
   else {digitalWrite(sensor, LOW);
   digitalWrite(LED_BUILTIN, LOW);}
+  */
 
+  if(cds1 < 800 or cds2 < 800){
+    digitalWrite(13, HIGH);
+  } else {
+    digitalWrite(13, LOW);
+  }
   // but actually the LED is on; this is because
   // it is active low on the ESP-01)
-
 
   if ((client.connected())){
     //연결 완료

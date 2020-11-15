@@ -1,5 +1,5 @@
-
-#include <WiFi.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
 #include <WebSocketClient.h>
 
 #ifndef STASSID
@@ -8,6 +8,7 @@
 #endif
 
 //WiFi setup
+String DEVICE_NAME = "Laser 2 : ";
 int s_status = WL_IDLE_STATUS;
 const char* ssid = STASSID;
 const char* password = STAPSK;
@@ -16,15 +17,14 @@ char path [] = "/";
 char host [] = "192.168.4.1";
 
 //Laser & CDS setup
-int cds = A0;
-const int LaserPin = 13;
-int LED = 2;
+int cds1 = A0;
+
 int count =0;
+
 WebSocketClient webSocketClient;
 WiFiClient client;
-
 void _WiFi_setup(){
-  // WiFi.mode(WIFI_STA);
+   WiFi.mode(WIFI_STA);
   s_status = WiFi.begin(ssid, password);
   Serial.println("");
 Serial.println("  WiFi Begin() Done.");
@@ -66,28 +66,25 @@ Serial.println("  WiFi Begin() Done.");
     }
       
   }
-  
 void setup() {
   // put your setup code here, to run once:  
   Serial.begin(115200);
-    Serial.println("Laser Setup Start...");
+  Serial.println("Laser Setup Start...");
   /**************************************/
   /***********Laser Sensor Set***********/
   
-  pinMode(cds,INPUT); //CDS : 조도센서
-  pinMode(LED, OUTPUT); //LED : 감지 ON/OFF 
-  pinMode(LaserPin, OUTPUT); // Laser Module 
-  pinMode(LED_BUILTIN, OUTPUT); //WIFI LED
-  
+  pinMode(cds1,INPUT); //CDS : 조도센서
+  pinMode(13, OUTPUT); //LED : 감지 ON/OFF 
+
   /*********Laser Sensor END************/
   /**************************************/
 Serial.println("Laser Setup Done.");
-
   /**************************************/
   /**********   WiFi Setup      *********/
   Serial.println("WiFi Setup Start...");
-
-  //WiFi.mode(WIFI_STA);
+  Serial.println("  WiFi Begin() Start...");
+    // ERROR : ets Jan  8 2013,rst cause:4, boot mode:(3,6)
+  WiFi.mode(WIFI_STA);
   s_status = WiFi.begin(ssid, password);
   Serial.println("");
 Serial.println("  WiFi Begin() Done.");
@@ -136,37 +133,48 @@ Serial.println("  WiFi Begin() Done.");
 
 
 void loop() {
-    delay(1000);
-  String data = "Sensor 1";  
+   delay(1000);
+  String msg = "Lost Detected";  
 
-  // put your main code here, to run repeatedly:
-  digitalWrite(LaserPin, HIGH); 
-  digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-  cds = analogRead(A0);
-  Serial.println(cds) ;
-  if(cds < 800){digitalWrite(LED,HIGH);}
-  else {digitalWrite(LED, LOW);}
+     // Turn the LED on (Note that LOW is the voltage level
+  cds1 = analogRead(A0);
 
+  
+  Serial.println("cds1 : "+ String(cds1));
+
+  /*
+  if(cds < 800){
+    digitalWrite(sensor,HIGH);
+    digitalWrite(LED_BUILTIN, HIGH);}
+  else {digitalWrite(sensor, LOW);
+  digitalWrite(LED_BUILTIN, LOW);}
+  */
+
+  if(cds1 < 800 ){
+    digitalWrite(13, HIGH);
+  } else {
+    digitalWrite(13, LOW);
+  }
   // but actually the LED is on; this is because
   // it is active low on the ESP-01)
-  
 
   if ((client.connected())){
     //연결 완료
     //데이터 전송
-    webSocketClient.sendData("msg count : "+String(count++));
-    //Serial.print("Sensor 1\n");
-    webSocketClient.getData(data);
-    if(data.length() > 0)
-      Serial.println(data);
-
+      if(cds1 < 800 ){
+        webSocketClient.sendData(DEVICE_NAME +msg);    
+        Serial.println("Detected, Send.");
+      }else{
+        webSocketClient.sendData(".");    
+      }
     }else{
-          Serial.print(".");
+       Serial.print(".");
        _WiFi_setup();  //A Line to avoid webSocket Error 1006 : "connection failed with no reason"
       //When Connection is Failed Due to websocket Network error, Try WiFi.begin again 
               return;
      }
 
+    //webSocketClient.sendData("msg count : "+String(count++));
     // capture the value of analog 1, send it along
     //pinMode(1, INPUT);
     //data = String(analogRead(1));
