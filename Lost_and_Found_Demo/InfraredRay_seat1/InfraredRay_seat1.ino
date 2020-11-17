@@ -5,17 +5,18 @@
 #ifndef STASSID
 #define STASSID "raspi_SSongJeong"
 #define STAPSK  "32152332"
+#define LIMIT 10
 #endif
 
 //WiFi setup
-String DEVICE_NAME = "[Infrared 0] : ";
+String DEVICE_NAME = "Infrared 0 : ";
 int s_status = WL_IDLE_STATUS;
 const char* ssid = STASSID;
 const char* password = STAPSK;
 const int Port = 9999;
 char path [] = "/";
 char host [] = "192.168.4.1";
-
+int count =0;
 WebSocketClient webSocketClient;
 WiFiClient client;
 
@@ -90,9 +91,10 @@ Serial.println("Pressure  Setup Done.");
 Serial.println("  WiFi Begin() Done.");
 
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED or count > LIMIT) {
     delay(500);
     Serial.print(".");
+    count++;
    //s_status =  WiFi.begin(ssid, password);
   }
   Serial.println("");
@@ -138,7 +140,6 @@ void loop() {
 
  // 적외선 감지 센서 부터 센서값을 읽습니다.
  // 감지되면 0, 감지되지 않으면 1이 나옵니다.
-  int fsrADC = analogRead(FSR_PIN);
 
   int s1 = digitalRead(D2);
   int s2 = digitalRead(D3);
@@ -153,7 +154,7 @@ void loop() {
 
   
 // 측정된 센서값이 0(감지)면 아래 블록을 실행합니다.
-  if(s1 ==  0 or s2 == 0 ){
+  if(s1 == 0 or s2 == 0 ){
     Serial.println(" [Infrared] Lost Detected! ");
     digitalWrite(LED_BUILTIN, LOW);
   }
@@ -166,7 +167,7 @@ void loop() {
         webSocketClient.sendData(DEVICE_NAME +msg);    
         Serial.println("Detected, Send.");
       }else{
-        webSocketClient.sendData(".");    
+        webSocketClient.sendData("I.");    
       }
     }else{
        Serial.print(".");

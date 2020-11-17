@@ -134,7 +134,7 @@ Serial.println("  WiFi Begin() Done.");
 
 
 void loop() {
-   delay(1000);
+   delay(100);
   String msg = "Lost Detected";  
  int fsrADC = analogRead(FSR_PIN);
   // If the FSR has no pressure, the resistance will be
@@ -146,23 +146,17 @@ void loop() {
     // Use voltage and static resistor value to 
     // calculate FSR resistance:
     float fsrR = R_DIV * (VCC / fsrV - 1.0);
-    //Serial.println("Resistance: " + String(fsrR) + " ohms");
+    Serial.println("Resistance: " + String(fsrR) + " ohms");
     // Guesstimate force based on slopes in figure 3 of
     // FSR datasheet:
     float force;
     float fsrG = 1.0 / fsrR; // Calculate conductance
     // Break parabolic curve down into two linear slopes:
     
-    //Serial.println("!!" + String(fsrADC));
-    if (fsrADC > 8)
-      digitalWrite(LED_BUILTIN, LOW);
-    else
-      digitalWrite(LED_BUILTIN, HIGH);
-
-    if (fsrR <= 600) 
-    {
-      force = (fsrG - 0.00075) / 0.00000032639;
-       if ((client.connected())){
+    Serial.println("!!" + String(fsrADC));
+    if (fsrADC > 8){
+      digitalWrite(LED_BUILTIN, LOW);  
+      if ((client.connected())){
     //연결 완료
     //데이터 전송
         webSocketClient.sendData(DEVICE_NAME +msg);    
@@ -175,10 +169,20 @@ void loop() {
       }
     }
     else{
+      digitalWrite(LED_BUILTIN, HIGH);      
+      webSocketClient.sendData("P.");  }  
+
+ 
+    if (fsrR <= 600) 
+    {
+      force = (fsrG - 0.00075) / 0.00000032639;
+     
+    }
+    else{
       force =  fsrG / 0.000000642857;
 
      }
-    //Serial.println("Force: " + String(force) + " g");
+    Serial.println("Force: " + String(force) + " g");
     //Serial.println();
     
    
