@@ -76,6 +76,8 @@ void setup() {
   
   pinMode(FSR_PIN, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(D8, OUTPUT);
+
 
   /*********Pressure Sensor END************/
   /**************************************/
@@ -155,7 +157,8 @@ void loop() {
     
     Serial.println("!!" + String(fsrADC));
     if (fsrADC > 8){
-      digitalWrite(LED_BUILTIN, LOW);  
+      digitalWrite(LED_BUILTIN, LOW);
+      digitalWrite(D8, HIGH);  
       if ((client.connected())){
     //연결 완료
     //데이터 전송
@@ -169,8 +172,11 @@ void loop() {
       }
     }
     else{
-      digitalWrite(LED_BUILTIN, HIGH);      
-      webSocketClient.sendData("P.");  }  
+      digitalWrite(LED_BUILTIN, HIGH);  
+      digitalWrite(D8, LOW);  
+    
+      //webSocketClient.sendData("P.");  
+      }  
 
  
     if (fsrR <= 600) 

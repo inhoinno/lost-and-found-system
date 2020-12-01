@@ -74,12 +74,12 @@ void setup() {
   
   pinMode(D2, INPUT);
   pinMode(D3, INPUT);
-  //pinMode(D4, INPUT);
+  pinMode(D4, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
   /*********Infrared-Ray Sensor END************/
   /**************************************/
-Serial.println("Pressure  Setup Done.");
+Serial.println("Infra-Red Ray Sensor Setup Done.");
   /**************************************/
   /**********   WiFi Setup      *********/
   Serial.println("WiFi Setup Start...");
@@ -91,10 +91,9 @@ Serial.println("Pressure  Setup Done.");
 Serial.println("  WiFi Begin() Done.");
 
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED or count > LIMIT) {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
-    count++;
    //s_status =  WiFi.begin(ssid, password);
   }
   Serial.println("");
@@ -157,17 +156,22 @@ void loop() {
   if(s1 == 0 or s2 == 0 ){
     Serial.println(" [Infrared] Lost Detected! ");
     digitalWrite(LED_BUILTIN, LOW);
-  }
+    digitalWrite(D4, HIGH);
+  }else{
+        digitalWrite(D4,LOW);
     digitalWrite(LED_BUILTIN, HIGH);
-
+  }
   if ((client.connected())){
     //연결 완료
     //데이터 전송
       if(s1 ==  0 or s2 == 0 ){
         webSocketClient.sendData(DEVICE_NAME +msg);    
         Serial.println("Detected, Send.");
+        //digitalWrite(D4,HIGH);
+
       }else{
-        webSocketClient.sendData("I.");    
+         //digitalWrite(D4,LOW);
+        //webSocketClient.sendData("I.");    
       }
     }else{
        Serial.print(".");
